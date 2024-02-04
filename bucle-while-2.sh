@@ -5,10 +5,10 @@
 # Un cop el nom introduït sigui vàlid (existent), mostra TOTA la informació disponible  relacionada amb aquest compte d’usuari del sistema.
 
 # Obtener nombres de cuentas de usuario con al menos una letra mayúscula
-usuarios_con_mayuscula=$(grep -E '^[a-zA-Z0-9_]+:[^\*:]*[A-Z]+[^\*:]*:' /etc/passwd | cut -d: -f1)
+usuarios_con_mayuscula=$(awk -F: 'tolower($1) != $1 {print $1}' /etc/passwd)
 
 # Mostrar los nombres de cuentas de usuario con al menos una letra mayúscula
-echo "Nombres de cuentas de usuario con al menos una letra mayúscula: $usuarios_con_mayuscula"
+echo "Nombres de cuentas de usuario amb almenys una lletra majúscula: $usuarios_con_mayuscula"
 
 # Solicitar un nombre de usuario
 read -p "Introdueix un nom d'usuari: " nom_usuari
