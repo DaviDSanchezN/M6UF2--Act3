@@ -3,54 +3,55 @@
 # Realitza un script que tregui els comentaris (aquells que comencen per # i arriben fins al final de la línia) de l’arxiu. Un cop els comentaris ja estiguin eliminats, 
 # demana si una paraula existeix dins d’un arxiu. I un cop feta aquesta comprovació, demana que s’afegeixi una frase al final de l’arxiu (és obligatori que s’introdueixi).
 
-# Comprova si s'ha proporcionat un argument d'arxiu
-if [ "$#" -eq 0 ]; then
-    echo "Usage: $0 <nom_arxiu>"
-    exit 1
-fi
+# Solicitar el nombre del archivo
+read -p "Introdueix el nom de l'arxiu: " arxiu
 
-arxiu="$1"
-
-# Comprova si l'arxiu existeix
+# Comprobar si el archivo existe
 if [ ! -f "$arxiu" ]; then
-    echo "L'arxiu no existeix."
+    echo "Error: L'arxiu no existeix."
     exit 1
 fi
 
-# Crear un nou arxiu sense comentaris
-nou_arxiu="nou_$arxiu"
+# Crear una copia del archivo original para preservar su contenido
+cp "$arxiu" "$arxiu.bak"
 
-# Utilitza un bucle for per llegir línia per línia i processar l'arxiu
-for linia in $(cat "$arxiu"); do
-    # Elimina els comentaris de cada línia
-    linia_sense_comentaris=$(echo "$linia" | sed 's/#.*//')
-    
-    # Afegix la línia sense comentaris al nou arxiu
-    echo "$linia_sense_comentaris" >> "$nou_arxiu"
+# Inicializar una variable para almacenar el contenido sin comentarios
+contingut_sense_comentaris=""
+
+# Eliminar comentarios del archivo utilizando un bucle for
+IFS=$'\n'  # Establecer el separador de campo interno para que incluya solo saltos de línea
+for linia in $(cat "$arxiu.bak"); do
+    # Comprobar si la línea no comienza con #
+    if [[ ! $linia =~ ^\s*# ]]; then
+        contingut_sense_comentaris+="$linia"$'\n'
+    fi
 done
 
-# Mostra el contingut del nou arxiu
+# Guardar las nuevas líneas en el archivo
+echo -e "$contingut_sense_comentaris" > "$arxiu"
+
+# Mostrar el contenido actual del archivo sin comentarios
 echo -e "\nContingut de l'arxiu sense comentaris:"
-cat "$nou_arxiu"
+cat "$arxiu"
 
-# Demana la paraula a buscar
-read -p "Introdueix la paraula a buscar a l'arxiu: " paraula
+# Solicitar palabra o frase para buscar
+read -p "Introdueix la paraula o frase a buscar: " paraula_frase
 
-# Comprova si la paraula existeix al nou arxiu
-if grep -q "\<$paraula\>" "$nou_arxiu"; then
-    echo "La paraula '$paraula' existeix a l'arxiu."
+# Comprobar si la palabra o frase existe en el archivo
+if grep -q "$paraula_frase" "$arxiu"; then
+    echo "La paraula o frase '$paraula_frase' existeix a l'arxiu."
 else
-    echo "La paraula '$paraula' no existeix a l'arxiu."
+    echo "La paraula o frase '$paraula_frase' no existeix a l'arxiu."
 fi
 
-# Demana la frase a afegir
-read -p "Introdueix una frase per afegir a l'arxiu: " frase
+# Solicitar una nova frase per afegir al final de l'arxiu
+read -p "Introdueix la nova frase a afegir: " nova_frase
 
-# Afegix la frase al final del nou arxiu
-echo "$frase" >> "$nou_arxiu"
+# Afegir la nova frase al final de l'arxiu
+echo "$nova_frase" >> "$arxiu"
 
-echo "Frase afegida al nou arxiu."
+echo "La nova frase s'ha afegit a l'arxiu."
 
-# Mostra el contingut final del nou arxiu
-echo -e "\nContingut final de l'arxiu sense comentaris i amb la frase afegida:"
-cat "$nou_arxiu"
+# Mostrar el contingut final de l'arxiu
+echo -e "\nContingut final de l'arxiu:"
+cat "$arxiu"
